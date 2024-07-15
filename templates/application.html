@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Natural Language to SQL Query Executor</title>
+    <link href="{{url_for('static',filename='css/main.css')}}" rel="stylesheet">
+</head>
+
+<body class="flex flex-col min-h-screen">
+    <div class="flex justify-center bg-blue-700 p-5 gap-5">
+        <div class="text-white hover:underline cursor-pointer"><a href="http://127.0.0.1:5000/">Home</a></div>
+        <div class="text-white hover:underline cursor-pointer"><a
+                href="http://127.0.0.1:5000/application">Application</a>
+        </div>
+    </div>
+    <div class="px-[10%] flex-grow">
+        <h1 class="text-[40px] font-extrabold text-center mb-10">Natural Language to SQL Query</h1>
+        <div class="grid grid-cols-2">
+
+            <div>
+                <h3 class="font-bold mt-5 text-[30px] mb-2">Ask Your Question:</h3>
+                <form method="post" class="mb-5">
+                    <div class=" w-full text-lg mb-5">
+                        <textarea name="query" rows="3" cols="50"
+                            class="box-border w-full p-2 h-full bg-slate-100 rounded-lg">{{ question }}</textarea>
+                    </div>
+
+                    <input type="submit" value="Execute"
+                        class="cursor-pointer bg-blue-700 p-2 rounded-lg px-4 text-white">
+                </form>
+            </div>
+            <div>
+                <img src="{{ url_for('static', filename='images/2.png') }}" alt="" class="w-[1500px]">
+            </div>
+        </div>
+        {% if query%}
+        <h3 class="font-bold text-[30px] mb-2">SQL Query:</h3>
+        <div class="bg-blue-500 p-5 rounded-lg">{{ query }}</div>
+        {% endif %}
+
+        {% if result %}
+        <h2 class="font-bold mt-5 text-[30px] mb-2">Results:</h2>
+        {% if columns %}
+        <table class="border-5 border-gray-300">
+            <tr class="border border-gray-300 p-2">
+                {% for column in columns %}
+                <th class="border border-gray-300 p-2">{{ column }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in result %}
+            <tr class="border border-gray-300 p-2">
+                {% for item in row %}
+                <td class="border border-gray-300 p-2">{{ item }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>{{ result }}</p>
+        {% endif %}
+        {% endif %}
+    </div>
+    <footer class="text-center p-5 bg-blue-700 mt-20 text-white ">Created By DKH</footer>
+</body>
+
+</html>

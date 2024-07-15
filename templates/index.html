@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Merge TailwindCSS into Flask app</title>
+    <link href="{{url_for('static',filename='css/main.css')}}" rel="stylesheet">
+</head>
+
+<body class=" text-gray-800 min-h-screen">
+    <div class="flex justify-center bg-blue-700 p-5 gap-5">
+        <div class="text-white hover:underline cursor-pointer"><a href="http://127.0.0.1:5000/">Home</a></div>
+        <div class="text-white hover:underline cursor-pointer"><a
+                href="http://127.0.0.1:5000/application">Application</a></div>
+    </div>
+    <div class="max-w-4xl mx-auto p-8 bg-white  mt-10 flex-grow">
+        <img src="{{ url_for('static', filename='images/1.png') }}" alt="">
+
+        <div class="text-[40px] font-extrabold text-center mb-10">Mastering Natural Language to SQL with LangChain |
+            NL2SQL
+        </div>
+        <h1 class="text-3xl font-bold mb-6">Introduction</h1>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            Welcome to our deep dive into revolutionizing the way we interact with databases using Natural Language
+            Processing (NLP) and LangChain. In today's data-driven world, the ability to query databases without needing
+            to know complex SQL syntax opens up a myriad of possibilities across various industries, from healthcare to
+            finance, making data more accessible to everyone.
+        </p>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            This blog post aims to guide you through a comprehensive journey to master NL2SQL using LangChain. We will
+            explore the steps necessary to build an intuitive, efficient, and intelligent NL2SQL model that can
+            understand and process natural language queries, dynamically select relevant database tables, and maintain a
+            conversational context to handle follow-up questions effectively.
+        </p>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            By the end of this post, you'll have a solid understanding of:
+        </p>
+        <ul class="list-disc pl-6 mb-4">
+            <li>Building a Basic NL2SQL Model: The foundation of translating natural language queries into SQL commands.
+            </li>
+            <li>Incorporating Few-Shot Learning: Enhancing model accuracy with examples.</li>
+            <li>Dynamic Few-Shot Example Selection: Tailoring examples to the query context for improved relevance.</li>
+            <li>Dynamic Relevant Table Selection: Automatically identifying which tables to query based on the natural
+                language input.</li>
+            <li>Customizing Prompts and Responses: Fine-tuning the model's interaction to provide clear, concise, and
+                relevant answers.</li>
+            <li>Adding Memory to Chatbots: Enabling the model to handle follow-up questions by remembering the context
+                of the conversation.</li>
+        </ul>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            Through each of these steps, we'll discuss the concepts, show you how to implement them, and illustrate the
+            outcomes, ensuring you have the tools and knowledge needed to bring the power of NL2SQL to your databases.
+        </p>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            Let's embark on this exciting journey to unlock the full potential of your data, making database queries as
+            simple as conversing with a friend.
+        </p>
+
+        <h2 class="text-2xl font-bold mb-4 mt-8">Building a Basic NL2SQL Model</h2>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            The first step in our journey to revolutionize database querying with natural language is constructing a
+            basic NL2SQL model using LangChain. This foundational model serves as the cornerstone for more advanced
+            functionalities we'll explore later. Here's how we begin:
+        </p>
+        <h3 class="text-xl font-semibold mb-2">Understanding the Basics</h3>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            At its core, an NL2SQL model aims to translate natural language queries into SQL commands. But how do we
+            start building such a model with LangChain?
+        </p>
+        <h3 class="text-xl font-semibold mb-2">Setting Up LangChain</h3>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            LangChain simplifies the process of creating NL2SQL models by providing a flexible framework that integrates
+            seamlessly with existing databases and natural language processing (NLP) models. To get started, you'll need
+            to:
+        </p>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]"><strong>Install LangChain:</strong> Ensure that LangChain
+            is installed in your environment.</p>
+        <pre
+            class="bg-gray-100 p-4 rounded mb-4 overflow-x-auto"><code>pip install langchain_openai langchain_community langchain pymysql chromadb -q</code></pre>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]"><strong>Connect to Your Database:</strong> The next step
+            involves establishing a connection to
+            your database. LangChain supports various database systems, so you'll likely find your database among the
+            supported ones. You'll use the database credentials to create a connection that LangChain can use to
+            interact with your data.</p>
+        <pre class="bg-gray-100 p-4 rounded mb-4 overflow-x-auto">
+<code>
+import os
+os.environ["OPENAI_API_KEY"] = ""
+
+db_user = ""
+db_password = ""
+db_host = ""
+db_name = "classicmodels"
+from langchain_community.utilities.sql_database import SQLDatabase
+# db = SQLDatabase.from_uri(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}",sample_rows_in_table_info=1,include_tables=['customers','orders'],custom_table_info={'customers':"customer"})
+db = SQLDatabase.from_uri(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
+print(db.dialect)
+print(db.get_usable_table_names())
+print(db.table_info)
+</code>
+</pre>
+        <h3 class="text-xl font-semibold mb-2">The First Query</h3>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            Once the setup is complete, the real magic begins. You can start by formulating a simple query in natural
+            language, such as "Show me all products priced above $100." LangChain takes this input and, through its
+            integration with language models like ChatGPT and your database, generates an SQL query that precisely
+            captures the intent of your request.
+        </p>
+        <pre class="bg-gray-100 p-4 rounded mb-4 overflow-x-auto">
+<code>
+from langchain.chains import create_sql_query_chain
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+generate_query = create_sql_query_chain(llm, db)
+query = generate_query.invoke({"question": "what is price of `1968 Ford Mustang`"})
+# "what is price of `1968 Ford Mustang`"
+print(query)
+</code>
+</pre>
+        <h3 class="text-xl font-semibold mb-2">Seeing the Results</h3>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            Executing the generated SQL query against your database retrieves the data you're looking for, which
+            LangChain can then present in a user-friendly format.
+        </p>
+        <pre class="bg-gray-100 p-4 rounded mb-4 overflow-x-auto">
+<code>
+from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
+execute_query = QuerySQLDataBaseTool(db=db)
+execute_query.invoke(query)
+</code>
+</pre>
+        <h3 class="text-xl font-semibold mb-2">Moving Forward</h3>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            With the basic NL2SQL model set up, you've taken the first step towards transforming how we interact with
+            databases. However, this is just the beginning. As we progress, we'll explore how to enhance the model's
+            accuracy, handle more complex queries, and even maintain context over a conversation for follow-up
+            questions.
+        </p>
+
+        <h2 class="text-2xl font-bold mb-4 mt-8">Rephrasing Answers for Enhanced Clarity</h2>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            After your NL2SQL model successfully executes a SQL query, the next pivotal step is to present the data in a
+            manner that's easily understandable by your users. This is where the art of rephrasing SQL results into
+            clear, natural language answers comes into play. Here's how you can achieve this with LangChain:
+        </p>
+        <h3 class="text-xl font-semibold mb-2">Implementing Rephrasing with LangChain</h3>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            <strong>Use Prompt Templates:</strong> LangChain allows you to create prompt templates that can guide the
+            model in how to rephrase SQL results. These templates can include placeholders for the original question,
+            the SQL query, and the query result, setting the stage for generating a natural language response.
+        </p>
+        <pre class="bg-gray-100 p-4 rounded mb-4 overflow-x-auto">
+<code>
+from operator import itemgetter
+
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+
+answer_prompt = PromptTemplate.from_template(
+    """Given the following user question, corresponding SQL query, and SQL result, answer the user question.
+
+Question: {question}
+SQL Query: {query}
+SQL Result: {result}
+Answer: """
+)
+
+rephrase_answer = answer_prompt | llm | StrOutputParser()
+
+chain = (
+    RunnablePassthrough.assign(query=generate_query).assign(
+        result=itemgetter("query") | execute_query
+    )
+    | rephrase_answer
+)
+
+chain.invoke({"question": "How many customers have an order count greater than 5"})
+</code>
+</pre>
+        <h3 class="text-xl font-semibold mb-2">Example: Transforming SQL Results into User-Friendly Responses</h3>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            Let's consider a user asks, "How many customers have an order count greater than 5?" and the SQL query
+            returns a count of 42. Instead of presenting this raw data, LangChain helps you generate a polished response
+            like, "There are 42 customers who have placed more than 5 orders." This transformation not only enhances
+            clarity but also improves the overall user experience.
+        </p>
+
+        <h2 class="text-2xl font-bold mb-4 mt-8">Incorporating Few-Shot Learning for Improved Accuracy</h2>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            As we progress in our NL2SQL journey, it's crucial to focus on enhancing the model's accuracy. One effective
+            method is incorporating few-shot learning, where the model learns from a small number of example queries and
+            their corresponding SQL translations. This section delves into how few-shot learning can be implemented with
+            LangChain to improve your NL2SQL model's performance.
+        </p>
+        <h3 class="text-xl font-semibold mb-2">Why Few-Shot Learning?</h3>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            Few-shot learning provides the model with context and examples, enabling it to better understand and
+            generalize natural language queries. By providing just a handful of examples, you can significantly improve
+            the model's ability to generate accurate SQL queries for similar questions.
+        </p>
+        <h3 class="text-xl font-semibold mb-2">Implementing Few-Shot Learning in LangChain</h3>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            To incorporate few-shot learning, you can use LangChain's capabilities to input example queries and their
+            corresponding SQL translations. This helps the model recognize patterns and apply similar logic to new
+            queries.
+        </p>
+        <h3 class="text-xl font-semibold mb-2">Example: Adding Examples to the Model</h3>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            Suppose you have example queries like "List all employees in the sales department" and "Show the total sales
+            for the year 2023". By including these examples in your model setup, LangChain can learn the structure and
+            context, thereby generating more accurate SQL queries for similar new questions.
+        </p>
+        <pre class="bg-gray-100 p-4 rounded mb-4 overflow-x-auto">
+            <code>
+            # Example template and few-shot learning setup can be added here based on LangChain's documentation and capabilities
+            </code>
+        </pre>
+        <p class="mb-4 text-[20px] leading-[1.7777778rem]">
+            By leveraging few-shot learning, you enhance your NL2SQL model's ability to handle a wider range of queries
+            with improved accuracy, ultimately making your database interactions more robust and reliable.
+        </p>
+    </div>
+    <footer class="text-center p-5 bg-blue-700 mt-20 text-white">Created By DKH</footer>
+</body>
+
+</html>
